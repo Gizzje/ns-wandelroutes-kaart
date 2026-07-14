@@ -96,13 +96,23 @@ After=network.target
 [Service]
 WorkingDirectory=/opt/ns-wandelroutes
 EnvironmentFile=/opt/ns-wandelroutes/.env
-ExecStart=/opt/ns-wandelroutes/.venv/bin/gunicorn --chdir backend --bind 127.0.0.1:5000 app:app
+ExecStart=/opt/ns-wandelroutes/.venv/bin/gunicorn --chdir backend --bind 0.0.0.0:5000 app:app
 Restart=on-failure
 User=www-data
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+Let op het bind-adres: `0.0.0.0:5000` betekent dat gunicorn op alle
+netwerkinterfaces van de LXC luistert, niet alleen loopback. Dat is nodig
+zodra je reverse proxy (bijv. Nginx Proxy Manager) op een **ander**
+systeem/container draait en over het netwerk naar het IP-adres van deze LXC
+verbindt (zoals bij een centrale NPM-instantie die meerdere LXC's
+doorstuurt) — draait je reverse proxy wél op dezelfde LXC, dan mag je dit
+naar `127.0.0.1:5000` zetten zodat poort 5000 niet los bereikbaar is binnen
+je LAN. Poort 5000 zelf hoort sowieso nooit vanaf het internet bereikbaar te
+zijn — dat regelt je reverse proxy met de HTTPS/domeinnaam-kant.
 
 Dan:
 
