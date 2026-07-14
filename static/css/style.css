@@ -30,6 +30,21 @@ html, body {
     white-space: nowrap;
 }
 
+#sidebar-toggle {
+    display: none;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    border: none;
+    background: #22c55e;
+    color: #052e16;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#sidebar-close {
+    display: none;
+}
+
 #auth-form {
     display: flex;
     align-items: center;
@@ -163,4 +178,60 @@ label.checkbox {
 
 .route-tooltip {
     font-size: 0.85rem;
+}
+
+#sidebar-backdrop {
+    display: none;
+}
+
+/* Klein scherm: sidebar wordt een uitklapbaar paneel over de kaart heen,
+   in plaats van een vast blok dat de kaart permanent versmalt. */
+@media (max-width: 768px) {
+    #sidebar-toggle {
+        display: inline-block;
+    }
+
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 2000;
+        width: 85vw;
+        max-width: 320px;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    #sidebar-close {
+        display: block;
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        border-radius: 4px;
+        background: #e2e8f0;
+        font-size: 1.3rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    #sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1500;
+    }
+
+    #app.sidebar-open #sidebar {
+        transform: translateX(0);
+    }
+
+    #app.sidebar-open #sidebar-backdrop {
+        display: block;
+    }
 }

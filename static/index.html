@@ -10,6 +10,7 @@
 <body>
 <div id="app">
     <header id="topbar">
+        <button type="button" id="sidebar-toggle" aria-label="Filters tonen">&#9776; Filters</button>
         <h1>NS-wandelroutes</h1>
         <div id="auth-area">
             <form id="auth-form">
@@ -27,7 +28,9 @@
     </header>
 
     <div id="main">
+        <div id="sidebar-backdrop"></div>
         <aside id="sidebar">
+            <button type="button" id="sidebar-close" aria-label="Filters verbergen">&times;</button>
             <h2>Filters</h2>
 
             <div class="filter-group">

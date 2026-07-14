@@ -260,6 +260,16 @@ function toggleSet(set, value, on) {
     else set.delete(value);
 }
 
+function wireSidebarToggle() {
+    const app = document.getElementById("app");
+    const open = () => app.classList.add("sidebar-open");
+    const close = () => app.classList.remove("sidebar-open");
+
+    document.getElementById("sidebar-toggle").addEventListener("click", open);
+    document.getElementById("sidebar-close").addEventListener("click", close);
+    document.getElementById("sidebar-backdrop").addEventListener("click", close);
+}
+
 function setLoggedInUI(user) {
     state.user = user;
     document.getElementById("auth-form").hidden = !!user;
@@ -320,6 +330,7 @@ function wireAuthControls() {
 async function init() {
     wireFilterControls();
     wireAuthControls();
+    wireSidebarToggle();
 
     const [routesGeoJSON, railGeoJSON, stationsGeoJSON, meData] = await Promise.all([
         fetchJSON("/api/data/routes.geojson"),
