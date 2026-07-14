@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NS-wandelroutes kaart</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+<div id="app">
+    <header id="topbar">
+        <h1>NS-wandelroutes</h1>
+        <div id="auth-area">
+            <form id="auth-form">
+                <input type="text" id="auth-name" placeholder="Naam" autocomplete="username" required maxlength="50">
+                <input type="password" id="auth-password" placeholder="Wachtwoord" autocomplete="current-password" required minlength="6">
+                <button type="submit" id="login-btn">Inloggen</button>
+                <button type="button" id="register-btn">Account maken</button>
+                <span id="auth-error"></span>
+            </form>
+            <div id="auth-logged-in" hidden>
+                Ingelogd als <strong id="auth-user-name"></strong>
+                <button type="button" id="logout-btn">Uitloggen</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="main">
+        <aside id="sidebar">
+            <h2>Filters</h2>
+
+            <div class="filter-group">
+                <label>Afstand (km)</label>
+                <div class="range-inputs">
+                    <input type="number" id="filter-min-km" min="0" max="30" value="0" step="0.5">
+                    <span>&ndash;</span>
+                    <input type="number" id="filter-max-km" min="0" max="30" value="30" step="0.5">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Soort route</label>
+                <label class="checkbox"><input type="checkbox" id="filter-type-ns" checked> NS-wandelingen</label>
+                <label class="checkbox"><input type="checkbox" id="filter-type-ov" checked> OV-stappers (niet onderhouden)</label>
+            </div>
+
+            <div class="filter-group">
+                <label class="checkbox"><input type="checkbox" id="filter-hide-checked"> Verberg al gelopen routes</label>
+                <p class="hint" id="hide-checked-hint">Log in om routes af te vinken.</p>
+            </div>
+
+            <div class="filter-group">
+                <label>Terrein</label>
+                <div id="terrain-filters"></div>
+            </div>
+
+            <p class="route-count"><span id="route-count">0</span> routes zichtbaar</p>
+        </aside>
+
+        <div id="map"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/js/map.js"></script>
+</body>
+</html>
