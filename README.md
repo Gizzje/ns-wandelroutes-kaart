@@ -11,11 +11,16 @@ and optional per-account tracking of which routes you've already walked.
 
 ## Why
 
-Wandelnet publishes ~90 great station-to-station hiking routes, but only as
-a long, unfiltered list — there's no map, no way to filter by distance or
-terrain, and no way to track which ones you've already done. This project
+Wandelnet publishes ~90 great station-to-station hiking routes. Their own
+[route search](https://www.wandelnet.nl/wandelroute-zoeken) lets you filter
+by province, route type, and a min/max distance — but there's no way to
+filter by landscape (forest, heath, dunes, ...), and its overview map only
+plots each route's *starting point* as a dot, not the route itself; you
+only see the actual path once you open a route's individual page. There's
+also no way to track which ones you've already walked. This project
 scrapes the public route data (metadata, terrain tags, and GPS tracks) into
-a single dataset and renders it as a filterable map instead.
+a single dataset and renders every route as an actual line on one map,
+filterable by both distance and terrain.
 
 ## Screenshot
 
