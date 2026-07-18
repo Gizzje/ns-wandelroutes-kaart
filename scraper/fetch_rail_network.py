@@ -13,7 +13,7 @@ from pathlib import Path
 
 import requests
 
-USER_AGENT = "NS-wandelroutes-kaart/0.1 (persoonlijk project; contact: gizz@gizzah.net)"
+USER_AGENT = "ns-wandelroutes-kaart/0.1 (+https://github.com/Gizzje/ns-wandelroutes-kaart)"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"

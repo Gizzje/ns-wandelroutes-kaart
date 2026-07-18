@@ -16,7 +16,7 @@ import gpxpy
 import requests
 from bs4 import BeautifulSoup
 
-USER_AGENT = "NS-wandelroutes-kaart/0.1 (persoonlijk project; contact: gizz@gizzah.net)"
+USER_AGENT = "ns-wandelroutes-kaart/0.1 (+https://github.com/Gizzje/ns-wandelroutes-kaart)"
 REQUEST_DELAY_SECONDS = 1.0
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "data" / "routes.geojson"
 
