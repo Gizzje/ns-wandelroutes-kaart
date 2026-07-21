@@ -19,12 +19,16 @@ itself to ~1 request/second, out of courtesy to wandelnet.nl):
 ```bash
 ./.venv/bin/python scraper/scrape_routes.py
 ./.venv/bin/python scraper/fetch_rail_network.py
+./.venv/bin/python scraper/assign_provinces.py
 ```
 
 This writes `data/routes.geojson`, `data/rail_network.geojson`, and
-`data/stations.geojson`. Route and rail data barely changes, so you only
-need to re-run this occasionally (e.g. every few months), not on every
-deploy.
+`data/stations.geojson`, and tags each route in `routes.geojson` with its
+province (used for the province achievements). Route and rail data barely
+changes, so you only need to re-run this occasionally (e.g. every few
+months), not on every deploy. `assign_provinces.py` specifically only needs
+re-running if you re-ran `scrape_routes.py` (it reads the routes file, it
+doesn't fetch routes itself) — it's quick either way (a few seconds).
 
 Start the app:
 
@@ -47,6 +51,7 @@ python3 -m venv .venv
 ./.venv/bin/pip install -r scraper/requirements.txt -r backend/requirements-prod.txt
 ./.venv/bin/python scraper/scrape_routes.py
 ./.venv/bin/python scraper/fetch_rail_network.py
+./.venv/bin/python scraper/assign_provinces.py
 ```
 
 (No git on the server? Copy the repo folder over some other way, e.g.
@@ -194,6 +199,14 @@ needed, just re-deploy them and reload the page. Python code changes
 systemctl restart ns-wandelroutes
 ```
 
-To refresh the route/rail/station data, re-run the two scraper scripts (see
-above) and reload — no restart needed for that either, since it's served
-as static files too.
+To refresh the route/rail/station/province data, re-run the scraper scripts
+(see above) and reload — no restart needed for that either, since it's
+served as static files too.
+
+**Updating an existing deployment to a version that added the stats
+dashboard:** you need both a code update (`git pull` + `systemctl restart`,
+since `backend/achievements.py` and the new `/api/stats` endpoint are
+Python code) and one data update — run `scraper/assign_provinces.py` once
+to add province tags to your existing `data/routes.geojson` (no need to
+re-run the other scrapers, your existing route/rail/station data is still
+fine).

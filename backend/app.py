@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request, session, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
+import achievements
 import models
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +38,7 @@ app.config.update(
 )
 
 # Ga ervan uit dat de app achter één reverse proxy / tunnel draait (zoals
-# beschreven in INSTRUCTIES.md), zodat request.remote_addr het echte IP van de
+# beschreven in SETUP.md), zodat request.remote_addr het echte IP van de
 # bezoeker is i.p.v. dat van de proxy -- nodig voor de rate limit hieronder.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
@@ -179,6 +180,18 @@ def post_checked():
 
     models.set_route_checked(user["id"], route_id, checked)
     return jsonify({"ok": True})
+
+
+# --- Statistieken & achievements --------------------------------------
+
+
+@app.get("/api/stats")
+def get_stats():
+    user = _current_user()
+    if not user:
+        return jsonify({"error": "Niet ingelogd."}), 401
+    checked_route_ids = models.get_checked_route_ids(user["id"])
+    return jsonify(achievements.compute_stats(checked_route_ids))
 
 
 if __name__ == "__main__":

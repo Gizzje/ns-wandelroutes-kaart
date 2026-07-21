@@ -2,8 +2,9 @@
 
 An interactive map of every [NS-wandeling and OV-stapper](https://www.wandelnet.nl/ns-wandelingen)
 (Dutch "station-to-station" hiking route) in the Netherlands, plotted on top
-of the national main rail network, with filtering by distance and terrain
-and optional per-account tracking of which routes you've already walked.
+of the national main rail network, with filtering by distance and terrain,
+optional per-account tracking of which routes you've already walked, and a
+small stats dashboard with achievements for the completionists.
 
 > **Unofficial project.** Not affiliated with Wandelnet or NS. All route
 > data belongs to [wandelnet.nl](https://www.wandelnet.nl/) — this project
@@ -38,6 +39,12 @@ filterable by both distance and terrain.
 - Optional accounts (name + password, self-service signup) so you — and
   anyone you share the site with — can check off routes you've walked,
   each with their own independent list.
+- A stats dashboard (🏆 button once logged in) showing total distance
+  walked, routes checked off, province coverage, and ~19 achievements
+  (distance milestones, province coverage, terrain variety, completionist
+  badges, ...) that unlock automatically as you check off routes.
+- Tuned for touch: routes have a generous invisible tap area so they're
+  easy to hit on a phone, not just with a mouse.
 
 ## How it works
 
@@ -48,11 +55,19 @@ filterable by both distance and terrain.
   the [OpenStreetMap Overpass API](https://overpass-api.de/) and station
   locations from [rijdendetreinen.nl](https://www.rijdendetreinen.nl/en/open-data/stations)'s
   open dataset, also as GeoJSON.
-- Both are meant to be run occasionally, not on every page load — route and
-  rail data barely changes. The output lands in `data/` as static files.
+- `scraper/assign_provinces.py` tags each route with its province, needed
+  for the province-based achievements. Wandelnet doesn't expose this per
+  route, so it's derived by checking which official province boundary
+  (from [PDOK/CBS via cartomap.github.io](https://github.com/cartomap/nl))
+  contains the route's starting point.
+- All three are meant to be run occasionally, not on every page load — the
+  underlying data barely changes. Output lands in `data/` as static files.
 - `backend/` is a small Flask + SQLite app that serves the map and the
   generated data, plus a minimal accounts API for tracking checked-off
-  routes per user.
+  routes per user. `backend/achievements.py` derives all stats and
+  achievements on the fly from someone's checked routes — nothing extra is
+  stored, so adding new achievements there applies retroactively to
+  everyone.
 - `static/` is the map itself: vanilla JS + Leaflet, no build step.
 
 ## Requirements
@@ -72,6 +87,7 @@ python3 -m venv .venv
 
 ./.venv/bin/python scraper/scrape_routes.py
 ./.venv/bin/python scraper/fetch_rail_network.py
+./.venv/bin/python scraper/assign_provinces.py
 
 FLASK_DEBUG=1 ./.venv/bin/python backend/app.py
 ```
@@ -86,6 +102,8 @@ Then open http://localhost:5000.
   contributors, [ODbL](https://opendatacommons.org/licenses/odbl/).
 - Station locations: [rijdendetreinen.nl](https://www.rijdendetreinen.nl/en/open-data/stations)
   open dataset (CC0).
+- Province boundaries: PDOK/CBS, simplified for cartography by
+  [cartomap.github.io](https://github.com/cartomap/nl).
 - Base map tiles: OpenStreetMap.
 
 ## Limitations
@@ -102,6 +120,13 @@ Then open http://localhost:5000.
 - Self-service signup has no invite gate — anyone with the link can create
   an account. Fine for sharing with friends/family; add an invite-code
   check in `backend/app.py` if you need stricter access control.
+- "Total distance walked" uses the midpoint of each route's length range
+  (many routes have multiple length variants, e.g. "10.5 or 17.5 km") since
+  there's no way to know which variant you actually walked — treat it as an
+  indication, not an exact figure.
+- One route (Krickenbecker Seen) starts just across the German border, so
+  it has no assigned province and never counts toward province-based
+  achievements.
 
 ## License
 

@@ -34,7 +34,10 @@ const state = {
     },
 };
 
-const map = L.map("map", { renderer: L.canvas() }).setView([52.15, 5.3], 8);
+// tolerance = extra invisible click/tap radius (px) around every route line,
+// on top of its drawn weight -- makes routes far easier to hit on a touch
+// screen without changing how thick they look.
+const map = L.map("map", { renderer: L.canvas({ tolerance: 12 }) }).setView([52.15, 5.3], 8);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bijdragers',
     maxZoom: 19,
@@ -327,10 +330,72 @@ function wireAuthControls() {
     });
 }
 
+function renderStats(data) {
+    const { stats, achievements } = data;
+
+    document.getElementById("stat-distance").textContent = stats.total_distance_km;
+    document.getElementById("stat-routes").textContent = stats.total_routes;
+    document.getElementById("stat-provinces").textContent =
+        `${stats.provinces_covered.length}/${stats.provinces_total}`;
+
+    document.getElementById("stat-breakdown").textContent =
+        `${stats.ns_checked}/${stats.ns_total} NS-wandelingen · ${stats.ov_checked} OV-stappers` +
+        (stats.provinces_covered.length ? ` · ${stats.provinces_covered.join(", ")}` : "");
+
+    const grid = document.getElementById("achievements-grid");
+    grid.innerHTML = "";
+    achievements.forEach((a) => {
+        const tile = document.createElement("div");
+        tile.className = "achievement" + (a.unlocked ? "" : " locked");
+
+        const icon = document.createElement("div");
+        icon.className = "achievement-icon";
+        icon.textContent = a.icon;
+        tile.appendChild(icon);
+
+        const name = document.createElement("div");
+        name.className = "achievement-name";
+        name.textContent = a.name;
+        tile.appendChild(name);
+
+        const description = document.createElement("div");
+        description.className = "achievement-description";
+        description.textContent = a.description;
+        tile.appendChild(description);
+
+        grid.appendChild(tile);
+    });
+}
+
+function wireStatsModal() {
+    const backdrop = document.getElementById("stats-modal-backdrop");
+    const modal = document.getElementById("stats-modal");
+
+    const open = async () => {
+        backdrop.hidden = false;
+        modal.hidden = false;
+        try {
+            const data = await fetchJSON("/api/stats");
+            renderStats(data);
+        } catch (err) {
+            alert(`Kon statistieken niet laden: ${err.message}`);
+        }
+    };
+    const close = () => {
+        backdrop.hidden = true;
+        modal.hidden = true;
+    };
+
+    document.getElementById("stats-btn").addEventListener("click", open);
+    document.getElementById("stats-modal-close").addEventListener("click", close);
+    backdrop.addEventListener("click", close);
+}
+
 async function init() {
     wireFilterControls();
     wireAuthControls();
     wireSidebarToggle();
+    wireStatsModal();
 
     const [routesGeoJSON, railGeoJSON, stationsGeoJSON, meData] = await Promise.all([
         fetchJSON("/api/data/routes.geojson"),

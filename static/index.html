@@ -22,6 +22,7 @@
             </form>
             <div id="auth-logged-in" hidden>
                 Ingelogd als <strong id="auth-user-name"></strong>
+                <button type="button" id="stats-btn">&#127942; Statistieken</button>
                 <button type="button" id="logout-btn">Uitloggen</button>
             </div>
         </div>
@@ -62,6 +63,31 @@
         </aside>
 
         <div id="map"></div>
+    </div>
+
+    <div id="stats-modal-backdrop" hidden></div>
+    <div id="stats-modal" hidden role="dialog" aria-labelledby="stats-modal-title">
+        <button type="button" id="stats-modal-close" aria-label="Sluiten">&times;</button>
+        <h2 id="stats-modal-title">Mijn statistieken</h2>
+
+        <div id="stats-summary">
+            <div class="stat-tile">
+                <span class="stat-value" id="stat-distance">0</span>
+                <span class="stat-label">km gewandeld</span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-value" id="stat-routes">0</span>
+                <span class="stat-label">routes afgevinkt</span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-value" id="stat-provinces">0/12</span>
+                <span class="stat-label">provincies</span>
+            </div>
+        </div>
+        <p class="hint" id="stat-breakdown"></p>
+
+        <h3>Trofeeënkast</h3>
+        <div id="achievements-grid"></div>
     </div>
 </div>
 
