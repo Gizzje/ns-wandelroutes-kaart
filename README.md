@@ -23,9 +23,15 @@ scrapes the public route data (metadata, terrain tags, and GPS tracks) into
 a single dataset and renders every route as an actual line on one map,
 filterable by both distance and terrain.
 
-## Screenshot
+## Screenshots
 
 ![Screenshot of the map, filtered to forested NS-wandelingen near Utrecht](assets/screenshot.png)
+
+The stats dashboard (🏆 button, once logged in): total distance walked,
+routes checked off, province coverage, and the achievements trophy case —
+unlocked ones in yellow, locked ones grayed out with the goal still shown.
+
+![Screenshot of the stats dashboard, showing walked distance, route and province counts, and a grid of unlocked and locked achievements](assets/achievements.png)
 
 ## Features
 
