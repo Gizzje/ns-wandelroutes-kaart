@@ -144,7 +144,7 @@ function buildPopupContent(props) {
 
 async function toggleChecked(routeId, checked) {
     try {
-        await fetchJSON("/api/checked", {
+        const data = await fetchJSON("/api/checked", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ route_id: String(routeId), checked }),
@@ -152,9 +152,49 @@ async function toggleChecked(routeId, checked) {
         if (checked) state.checkedRouteIds.add(String(routeId));
         else state.checkedRouteIds.delete(String(routeId));
         applyFilters();
+        if (data.newly_unlocked && data.newly_unlocked.length) {
+            showAchievementToasts(data.newly_unlocked);
+        }
     } catch (err) {
         alert(`Kon niet opslaan: ${err.message}`);
     }
+}
+
+function showAchievementToasts(newAchievements) {
+    const container = document.getElementById("achievement-toasts");
+    newAchievements.forEach((a, index) => {
+        const toast = document.createElement("div");
+        toast.className = "achievement-toast";
+
+        const icon = document.createElement("span");
+        icon.className = "toast-icon";
+        icon.textContent = a.icon;
+        toast.appendChild(icon);
+
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "toast-title";
+        title.textContent = "Achievement ontgrendeld!";
+        text.appendChild(title);
+        const name = document.createElement("div");
+        name.className = "toast-name";
+        name.textContent = a.name;
+        text.appendChild(name);
+        toast.appendChild(text);
+
+        const dismiss = () => {
+            toast.classList.add("fade-out");
+            setTimeout(() => toast.remove(), 300);
+        };
+        toast.addEventListener("click", () => {
+            dismiss();
+            document.getElementById("stats-btn").click();
+        });
+        setTimeout(dismiss, 6000);
+
+        // meerdere tegelijk: iets vertraagd voor een prettiger stapel-effect
+        setTimeout(() => container.appendChild(toast), index * 200);
+    });
 }
 
 function applyFilters() {

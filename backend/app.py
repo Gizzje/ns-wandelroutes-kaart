@@ -1,6 +1,7 @@
 import os
 import time
 from collections import defaultdict, deque
+from datetime import timedelta
 from functools import wraps
 from pathlib import Path
 
@@ -36,6 +37,10 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=not DEBUG,
 )
+# Zonder dit verloopt de sessie zodra de browser dichtgaat (of soms al eerder
+# op mobiel) -- met session.permanent = True bij het inloggen (zie login()
+# en register()) blijft iemand nu een maand ingelogd.
+app.permanent_session_lifetime = timedelta(days=30)
 
 # Ga ervan uit dat de app achter één reverse proxy / tunnel draait (zoals
 # beschreven in SETUP.md), zodat request.remote_addr het echte IP van de
@@ -128,6 +133,7 @@ def register():
         return jsonify({"error": "Deze naam is al in gebruik."}), 409
 
     user_id = models.create_user(name, generate_password_hash(password))
+    session.permanent = True
     session["user_id"] = user_id
     session["user_name"] = name
     return jsonify({"user": {"id": user_id, "name": name}})
@@ -144,6 +150,7 @@ def login():
     if not user or not check_password_hash(user["password_hash"], password):
         return jsonify({"error": "Naam of wachtwoord is onjuist."}), 401
 
+    session.permanent = True
     session["user_id"] = user["id"]
     session["user_name"] = user["name"]
     return jsonify({"user": {"id": user["id"], "name": user["name"]}})
@@ -178,8 +185,15 @@ def post_checked():
     if not route_id:
         return jsonify({"error": "route_id ontbreekt."}), 400
 
+    before = achievements.compute_stats(models.get_checked_route_ids(user["id"]))
+    unlocked_before = {a["id"] for a in before["achievements"] if a["unlocked"]}
+
     models.set_route_checked(user["id"], route_id, checked)
-    return jsonify({"ok": True})
+
+    after = achievements.compute_stats(models.get_checked_route_ids(user["id"]))
+    newly_unlocked = [a for a in after["achievements"] if a["unlocked"] and a["id"] not in unlocked_before]
+
+    return jsonify({"ok": True, "newly_unlocked": newly_unlocked})
 
 
 # --- Statistieken & achievements --------------------------------------

@@ -399,3 +399,61 @@ label.checkbox {
     filter: grayscale(1);
     opacity: 0.6;
 }
+
+/* --- Achievement-toasts --- */
+
+#achievement-toasts {
+    position: fixed;
+    top: 4.5rem;
+    right: 1rem;
+    z-index: 4000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: min(320px, 90vw);
+}
+
+.achievement-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: #fffbeb;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    animation: achievement-toast-in 0.3s ease;
+}
+
+.achievement-toast.fade-out {
+    animation: achievement-toast-out 0.3s ease forwards;
+}
+
+.achievement-toast .toast-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.achievement-toast .toast-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #92400e;
+    font-weight: 700;
+}
+
+.achievement-toast .toast-name {
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+@keyframes achievement-toast-in {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes achievement-toast-out {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
