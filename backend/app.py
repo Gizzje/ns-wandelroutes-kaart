@@ -170,7 +170,8 @@ def get_checked():
     user = _current_user()
     if not user:
         return jsonify({"error": "Niet ingelogd."}), 401
-    return jsonify({"route_ids": models.get_checked_route_ids(user["id"])})
+    distances = models.get_checked_routes_with_distance(user["id"])
+    return jsonify({"route_ids": list(distances.keys()), "distances": distances})
 
 
 @app.post("/api/checked")
@@ -185,12 +186,21 @@ def post_checked():
     if not route_id:
         return jsonify({"error": "route_id ontbreekt."}), 400
 
-    before = achievements.compute_stats(models.get_checked_route_ids(user["id"]))
+    distance_km = body.get("distance_km")
+    if distance_km is not None:
+        try:
+            distance_km = float(distance_km)
+        except (TypeError, ValueError):
+            return jsonify({"error": "distance_km moet een getal zijn."}), 400
+        if not (0 < distance_km <= 200):
+            return jsonify({"error": "distance_km ligt buiten een realistische afstand."}), 400
+
+    before = achievements.compute_stats(models.get_checked_routes_with_distance(user["id"]))
     unlocked_before = {a["id"] for a in before["achievements"] if a["unlocked"]}
 
-    models.set_route_checked(user["id"], route_id, checked)
+    models.set_route_checked(user["id"], route_id, checked, distance_km)
 
-    after = achievements.compute_stats(models.get_checked_route_ids(user["id"]))
+    after = achievements.compute_stats(models.get_checked_routes_with_distance(user["id"]))
     newly_unlocked = [a for a in after["achievements"] if a["unlocked"] and a["id"] not in unlocked_before]
 
     return jsonify({"ok": True, "newly_unlocked": newly_unlocked})
@@ -204,8 +214,8 @@ def get_stats():
     user = _current_user()
     if not user:
         return jsonify({"error": "Niet ingelogd."}), 401
-    checked_route_ids = models.get_checked_route_ids(user["id"])
-    return jsonify(achievements.compute_stats(checked_route_ids))
+    checked_routes = models.get_checked_routes_with_distance(user["id"])
+    return jsonify(achievements.compute_stats(checked_routes))
 
 
 if __name__ == "__main__":

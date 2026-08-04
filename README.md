@@ -48,7 +48,11 @@ unlocked ones in yellow, locked ones grayed out with the goal still shown.
 - A stats dashboard (🏆 button once logged in) showing total distance
   walked, routes checked off, province coverage, and ~19 achievements
   (distance milestones, province coverage, terrain variety, completionist
-  badges, ...) that unlock automatically as you check off routes.
+  badges, ...) that unlock automatically as you check off routes. Checking
+  a route pops up a small toast for anything newly unlocked.
+- For routes with multiple length variants, you can say which one you
+  actually walked (defaults to the longest) — the stats use that instead
+  of guessing.
 - Tuned for touch: routes have a generous invisible tap area so they're
   easy to hit on a phone, not just with a mouse.
 
@@ -126,12 +130,10 @@ Then open http://localhost:5000.
 - Self-service signup has no invite gate — anyone with the link can create
   an account. Fine for sharing with friends/family; add an invite-code
   check in `backend/app.py` if you need stricter access control.
-- "Total distance walked" uses the *longest* length variant of each route
-  (many routes have multiple, e.g. "10.5 or 17.5 km") since there's no way
-  to know which one you actually walked. Applies to everyone on the same
-  instance — if most of your users tend to walk the shorter variant, this
-  will overstate their distance; treat it as an indication, not an exact
-  figure.
+- "Total distance walked" defaults to the *longest* length variant of a
+  route (many routes have multiple, e.g. "10.5 or 17.5 km") unless you pick
+  a specific one in the route popup when checking it off. The default is a
+  guess, not a measurement — pick the real one if it matters to you.
 - One route (Krickenbecker Seen) starts just across the German border, so
   it has no assigned province and never counts toward province-based
   achievements.

@@ -22,10 +22,13 @@ def _load_routes() -> dict[str, dict]:
     return _routes_cache
 
 
-def _route_distance(props: dict) -> float:
-    """Neemt de langste lengtevariant van een route (bijv. bij '10,5 of 17,5
-    km' telt 17,5 km mee) -- we weten niet welke variant iemand daadwerkelijk
-    liep, en dit is het meest motiverende uitgangspunt voor de statistieken."""
+def _route_distance(props: dict, override_km: float | None) -> float:
+    """Gebruikt de zelf opgegeven afstand als iemand die heeft ingevuld.
+    Anders de langste lengtevariant van de route (bijv. bij '10,5 of 17,5 km'
+    telt 17,5 km mee) -- zonder opgave is dat het meest motiverende
+    uitgangspunt."""
+    if override_km is not None:
+        return override_km
     lo = props.get("length_km_min")
     hi = props.get("length_km_max")
     if lo is None:
@@ -171,11 +174,13 @@ ACHIEVEMENTS = [
 ]
 
 
-def compute_stats(checked_route_ids: list[str]) -> dict:
+def compute_stats(checked_routes: dict[str, float | None]) -> dict:
+    """checked_routes: {route_id: zelf opgegeven afstand in km, of None}."""
     routes = _load_routes()
-    checked = [routes[rid] for rid in checked_route_ids if rid in routes]
+    checked_ids = [rid for rid in checked_routes if rid in routes]
+    checked = [routes[rid] for rid in checked_ids]
 
-    total_distance = sum(_route_distance(p) for p in checked)
+    total_distance = sum(_route_distance(routes[rid], checked_routes[rid]) for rid in checked_ids)
     provinces_covered = sorted({p["province"] for p in checked if p.get("province")})
     terrain_tags: set[str] = set()
     for p in checked:

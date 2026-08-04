@@ -63,7 +63,7 @@ def parse_overview(url: str, route_type: str) -> list[dict]:
         stations = stations.strip()
         start, _, end = stations.partition(" - ")
 
-        lengths = parse_lengths(text_el.get_text()) if text_el else []
+        lengths = sorted(set(parse_lengths(text_el.get_text()))) if text_el else []
         available = bool(lengths)
 
         routes.append(
@@ -73,8 +73,9 @@ def parse_overview(url: str, route_type: str) -> list[dict]:
                 "name": name,
                 "start_station": start.strip(),
                 "end_station": end.strip() or start.strip(),
-                "length_km_min": min(lengths) if lengths else None,
-                "length_km_max": max(lengths) if lengths else None,
+                "length_km_min": lengths[0] if lengths else None,
+                "length_km_max": lengths[-1] if lengths else None,
+                "length_km_options": lengths,
                 "available": available,
                 "detail_url": f"https://www.wandelnet.nl/wandelroute/{route_id}/",
             }
@@ -153,6 +154,7 @@ def main():
                     "end_station": route["end_station"],
                     "length_km_min": route["length_km_min"],
                     "length_km_max": route["length_km_max"],
+                    "length_km_options": route["length_km_options"],
                     "available": route["available"],
                     "terrain_tags": route["terrain_tags"],
                     "detail_url": route["detail_url"],

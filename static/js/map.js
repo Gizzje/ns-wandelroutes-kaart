@@ -23,6 +23,7 @@ const COLORS = {
 const state = {
     user: null,
     checkedRouteIds: new Set(),
+    checkedDistances: new Map(),
     routesLayer: null,
     routeLayersById: new Map(),
     filters: {
@@ -123,15 +124,48 @@ function buildPopupContent(props) {
     container.appendChild(link);
 
     if (state.user) {
+        const isChecked = state.checkedRouteIds.has(String(props.id));
+
         const label = document.createElement("label");
         label.className = "checked-toggle";
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.checked = state.checkedRouteIds.has(String(props.id));
-        checkbox.addEventListener("change", () => toggleChecked(props.id, checkbox.checked));
+        checkbox.checked = isChecked;
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(" Gelopen"));
         container.appendChild(label);
+
+        const options = props.length_km_options || [];
+        let distanceSelect = null;
+        if (options.length > 1) {
+            const distanceLabel = document.createElement("label");
+            distanceLabel.className = "distance-picker";
+            distanceLabel.appendChild(document.createTextNode("Gelopen afstand: "));
+
+            distanceSelect = document.createElement("select");
+            options.forEach((km) => {
+                const opt = document.createElement("option");
+                opt.value = String(km);
+                opt.textContent = `${km} km`;
+                distanceSelect.appendChild(opt);
+            });
+            const savedDistance = state.checkedDistances.get(String(props.id));
+            const defaultKm = savedDistance ?? options[options.length - 1];
+            distanceSelect.value = String(defaultKm);
+            distanceSelect.disabled = !isChecked;
+            distanceSelect.addEventListener("change", () => {
+                if (checkbox.checked) toggleChecked(props.id, true, parseFloat(distanceSelect.value));
+            });
+
+            distanceLabel.appendChild(distanceSelect);
+            container.appendChild(distanceLabel);
+        }
+
+        checkbox.addEventListener("change", () => {
+            if (distanceSelect) distanceSelect.disabled = !checkbox.checked;
+            const distanceKm = distanceSelect ? parseFloat(distanceSelect.value) : null;
+            toggleChecked(props.id, checkbox.checked, distanceKm);
+        });
     } else {
         const hint = document.createElement("p");
         hint.className = "hint";
@@ -142,15 +176,22 @@ function buildPopupContent(props) {
     return container;
 }
 
-async function toggleChecked(routeId, checked) {
+async function toggleChecked(routeId, checked, distanceKm) {
     try {
+        const body = { route_id: String(routeId), checked };
+        if (distanceKm != null && !Number.isNaN(distanceKm)) body.distance_km = distanceKm;
         const data = await fetchJSON("/api/checked", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ route_id: String(routeId), checked }),
+            body: JSON.stringify(body),
         });
-        if (checked) state.checkedRouteIds.add(String(routeId));
-        else state.checkedRouteIds.delete(String(routeId));
+        if (checked) {
+            state.checkedRouteIds.add(String(routeId));
+            if (body.distance_km != null) state.checkedDistances.set(String(routeId), body.distance_km);
+        } else {
+            state.checkedRouteIds.delete(String(routeId));
+            state.checkedDistances.delete(String(routeId));
+        }
         applyFilters();
         if (data.newly_unlocked && data.newly_unlocked.length) {
             showAchievementToasts(data.newly_unlocked);
@@ -325,10 +366,14 @@ function setLoggedInUI(user) {
 async function loadCheckedRoutes() {
     if (!state.user) {
         state.checkedRouteIds = new Set();
+        state.checkedDistances = new Map();
         return;
     }
     const data = await fetchJSON("/api/checked");
     state.checkedRouteIds = new Set(data.route_ids.map(String));
+    state.checkedDistances = new Map(
+        Object.entries(data.distances || {}).filter(([, km]) => km != null)
+    );
 }
 
 async function refreshAfterAuthChange() {

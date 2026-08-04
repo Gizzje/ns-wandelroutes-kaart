@@ -210,3 +210,14 @@ Python code) and one data update — run `scraper/assign_provinces.py` once
 to add province tags to your existing `data/routes.geojson` (no need to
 re-run the other scrapers, your existing route/rail/station data is still
 fine).
+
+**Updating to a version that added picking which length variant you
+walked:** code update as usual (`git pull` + `systemctl restart`).
+`backend/models.py` adds a `distance_km` column to the `checked_routes`
+table automatically the next time the app starts — existing accounts and
+checked-off routes are untouched (they just default to "unspecified", same
+as the old always-assume-longest behavior, until someone picks a specific
+distance). Re-run `scraper/scrape_routes.py` to backfill the length
+variants themselves into `data/routes.geojson` — routes scraped before this
+version only have the shortest/longest length stored, not the full list, so
+the picker won't show every option until you do.
