@@ -126,10 +126,12 @@ Then open http://localhost:5000.
 - Self-service signup has no invite gate — anyone with the link can create
   an account. Fine for sharing with friends/family; add an invite-code
   check in `backend/app.py` if you need stricter access control.
-- "Total distance walked" uses the midpoint of each route's length range
-  (many routes have multiple length variants, e.g. "10.5 or 17.5 km") since
-  there's no way to know which variant you actually walked — treat it as an
-  indication, not an exact figure.
+- "Total distance walked" uses the *longest* length variant of each route
+  (many routes have multiple, e.g. "10.5 or 17.5 km") since there's no way
+  to know which one you actually walked. Applies to everyone on the same
+  instance — if most of your users tend to walk the shorter variant, this
+  will overstate their distance; treat it as an indication, not an exact
+  figure.
 - One route (Krickenbecker Seen) starts just across the German border, so
   it has no assigned province and never counts toward province-based
   achievements.

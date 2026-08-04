@@ -23,11 +23,14 @@ def _load_routes() -> dict[str, dict]:
 
 
 def _route_distance(props: dict) -> float:
+    """Neemt de langste lengtevariant van een route (bijv. bij '10,5 of 17,5
+    km' telt 17,5 km mee) -- we weten niet welke variant iemand daadwerkelijk
+    liep, en dit is het meest motiverende uitgangspunt voor de statistieken."""
     lo = props.get("length_km_min")
     hi = props.get("length_km_max")
     if lo is None:
         return 0.0
-    return (lo + (hi if hi is not None else lo)) / 2
+    return hi if hi is not None else lo
 
 
 ACHIEVEMENTS = [
