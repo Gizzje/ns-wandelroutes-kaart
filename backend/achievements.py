@@ -171,6 +171,13 @@ ACHIEVEMENTS = [
         "icon": "\U0001F3A8",
         "check": lambda s: s["terrain_tags_covered"] >= 6,
     },
+    {
+        "id": "grenzeloos",
+        "name": "Grenzeloos",
+        "description": "Een route gelopen die de grens met een buurland over gaat.",
+        "icon": "\U0001F6C2",
+        "check": lambda s: s["border_crossing_count"] >= 1,
+    },
 ]
 
 
@@ -204,6 +211,7 @@ def compute_stats(checked_routes: dict[str, float | None]) -> dict:
         "kust_en_duinen_count": sum(
             1 for p in checked if "Kust en duinen" in p.get("terrain_tags", [])
         ),
+        "border_crossing_count": sum(1 for p in checked if p.get("crosses_border")),
     }
 
     achievements = [

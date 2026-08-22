@@ -221,3 +221,8 @@ distance). Re-run `scraper/scrape_routes.py` to backfill the length
 variants themselves into `data/routes.geojson` — routes scraped before this
 version only have the shortest/longest length stored, not the full list, so
 the picker won't show every option until you do.
+
+**Updating to a version that added the "Grenzeloos" (border-crossing)
+achievement:** code update as usual. Re-run `scraper/assign_provinces.py`
+once to backfill the `crosses_border` field into `data/routes.geojson` (no
+need to re-run `scrape_routes.py` for this one).

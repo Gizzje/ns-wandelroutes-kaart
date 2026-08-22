@@ -46,7 +46,7 @@ unlocked ones in yellow, locked ones grayed out with the goal still shown.
   anyone you share the site with — can check off routes you've walked,
   each with their own independent list.
 - A stats dashboard (🏆 button once logged in) showing total distance
-  walked, routes checked off, province coverage, and ~19 achievements
+  walked, routes checked off, province coverage, and 20 achievements
   (distance milestones, province coverage, terrain variety, completionist
   badges, ...) that unlock automatically as you check off routes. Checking
   a route pops up a small toast for anything newly unlocked.
@@ -69,7 +69,12 @@ unlocked ones in yellow, locked ones grayed out with the goal still shown.
   for the province-based achievements. Wandelnet doesn't expose this per
   route, so it's derived by checking which official province boundary
   (from [PDOK/CBS via cartomap.github.io](https://github.com/cartomap/nl))
-  contains the route's starting point.
+  contains the route's starting point. The same script also flags routes
+  that cross into Belgium or Germany, for the border-crossing achievement —
+  a route counts as crossing if at least 25% of its points fall outside
+  every province polygon, a threshold picked specifically to ignore the
+  handful of coastal/dike routes that dip outside the (simplified) province
+  outlines without actually leaving the country.
 - All three are meant to be run occasionally, not on every page load — the
   underlying data barely changes. Output lands in `data/` as static files.
 - `backend/` is a small Flask + SQLite app that serves the map and the
