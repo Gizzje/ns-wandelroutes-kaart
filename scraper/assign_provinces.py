@@ -2,8 +2,13 @@
 Voegt twee velden toe aan elke route in data/routes.geojson:
 - "province": nodig voor de provincie-achievements ("eerste route in deze
   provincie", "elke provincie een keer gelopen"). Wandelnet zelf geeft dit
-  niet per route mee, dus dit wordt afgeleid uit het beginpunt van de route
-  (point-in-polygon tegen de officiele provinciegrenzen).
+  niet per route mee, dus dit wordt afgeleid uit de routegeometrie: elk punt
+  van de route wordt tegen de officiele provinciegrenzen gelegd
+  (point-in-polygon), en de provincie die onder de meeste punten voorkomt
+  wint. Niet zomaar het beginpunt -- een route die met een enkel stukje net
+  over de grens begint of eindigt (bijv. Krickenbecker Seen, dat in
+  Kaldenkirchen, Duitsland start maar verder helemaal in Limburg loopt) moet
+  wel aan zijn "echte" provincie gekoppeld blijven.
 - "crosses_border": voor de grensoverschrijdende-route-achievement. Een
   route telt als grensoverschrijdend als een substantieel deel (>=25%) van
   zijn punten buiten alle provincies valt -- een lage drempel zou al snel
@@ -16,6 +21,7 @@ Provinciegrenzen veranderen praktisch nooit, dus dit hoeft maar zelden
 opnieuw.
 """
 import json
+from collections import Counter
 from pathlib import Path
 
 import requests
@@ -77,11 +83,20 @@ def find_province(lon: float, lat: float, provinces: list[dict]) -> str | None:
     return None
 
 
-def crosses_border(coords: list[list[float]], provinces: list[dict]) -> bool:
-    outside = sum(
-        1 for lon, lat in coords if not any(point_in_geometry(lon, lat, p["geometry"]) for p in provinces)
-    )
-    return (outside / len(coords)) >= BORDER_CROSSING_THRESHOLD if coords else False
+def analyze_route(coords: list[list[float]], provinces: list[dict]) -> tuple[str | None, bool]:
+    """Geeft (provincie, gaat-de-grens-over) terug voor een routegeometrie.
+    De provincie is de vaakst voorkomende onder de punten die wel in een
+    provincie liggen (punten buiten Nederland tellen niet mee voor de
+    provincie, wel voor de grensoverschrijding)."""
+    if not coords:
+        return None, False
+
+    matches = [find_province(lon, lat, provinces) for lon, lat in coords]
+    outside = sum(1 for m in matches if m is None)
+    matched_counts = Counter(m for m in matches if m)
+    province = matched_counts.most_common(1)[0][0] if matched_counts else None
+    crosses = (outside / len(coords)) >= BORDER_CROSSING_THRESHOLD
+    return province, crosses
 
 
 def main():
@@ -97,17 +112,13 @@ def main():
             feature["properties"]["crosses_border"] = False
             continue
 
-        coords = geometry["coordinates"]
-        lon, lat = coords[0]
-        province = find_province(lon, lat, provinces)
+        province, crosses = analyze_route(geometry["coordinates"], provinces)
         feature["properties"]["province"] = province
+        feature["properties"]["crosses_border"] = crosses
         if province:
             matched += 1
         else:
             print(f"WAARSCHUWING: geen provincie gevonden voor {feature['properties']['name']}")
-
-        crosses = crosses_border(coords, provinces)
-        feature["properties"]["crosses_border"] = crosses
         if crosses:
             border_crossers.append(feature["properties"]["name"])
 
