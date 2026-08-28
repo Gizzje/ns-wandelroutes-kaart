@@ -107,7 +107,11 @@ def fetch_stations() -> dict:
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
                 "properties": {
                     "code": row.get("code"),
-                    "name": row.get("name_medium") or row.get("name_long"),
+                    # name_long spelt uit (bijv. "Utrecht Centraal" i.p.v.
+                    # "Utrecht C.") -- duidelijker op de kaart, en nodig om
+                    # routeeindpunten betrouwbaar tegen stationsnamen te
+                    # kunnen matchen.
+                    "name": row.get("name_long") or row.get("name_medium"),
                     "type": row.get("type"),
                 },
             }

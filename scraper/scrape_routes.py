@@ -61,7 +61,10 @@ def parse_overview(url: str, route_type: str) -> list[dict]:
         name, _, stations = title.partition("|")
         name = name.strip()
         stations = stations.strip()
-        start, _, end = stations.partition(" - ")
+        # Meestal een gewoon koppelteken, een enkele route gebruikt een
+        # en-dash (–) als scheidingsteken tussen start en eind.
+        separator = " – " if " – " in stations else " - "
+        start, _, end = stations.partition(separator)
 
         lengths = sorted(set(parse_lengths(text_el.get_text()))) if text_el else []
         available = bool(lengths)

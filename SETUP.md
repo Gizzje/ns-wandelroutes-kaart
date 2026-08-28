@@ -20,15 +20,19 @@ itself to ~1 request/second, out of courtesy to wandelnet.nl):
 ./.venv/bin/python scraper/scrape_routes.py
 ./.venv/bin/python scraper/fetch_rail_network.py
 ./.venv/bin/python scraper/assign_provinces.py
+./.venv/bin/python scraper/check_station_endpoints.py
 ```
 
 This writes `data/routes.geojson`, `data/rail_network.geojson`, and
 `data/stations.geojson`, and tags each route in `routes.geojson` with its
-province (used for the province achievements). Route and rail data barely
-changes, so you only need to re-run this occasionally (e.g. every few
-months), not on every deploy. `assign_provinces.py` specifically only needs
-re-running if you re-ran `scrape_routes.py` (it reads the routes file, it
-doesn't fetch routes itself) — it's quick either way (a few seconds).
+province and whether it ends at a real station (used for the corresponding
+achievements). Route and rail data barely changes, so you only need to
+re-run this occasionally (e.g. every few months), not on every deploy.
+`assign_provinces.py` and `check_station_endpoints.py` only need re-running
+if you re-ran `scrape_routes.py` (they read the routes file, they don't
+fetch routes themselves) — both are quick either way (a few seconds), and
+`check_station_endpoints.py` additionally needs `data/stations.geojson` to
+already exist, so run it after `fetch_rail_network.py`.
 
 Start the app:
 
@@ -52,6 +56,7 @@ python3 -m venv .venv
 ./.venv/bin/python scraper/scrape_routes.py
 ./.venv/bin/python scraper/fetch_rail_network.py
 ./.venv/bin/python scraper/assign_provinces.py
+./.venv/bin/python scraper/check_station_endpoints.py
 ```
 
 (No git on the server? Copy the repo folder over some other way, e.g.
@@ -226,3 +231,12 @@ the picker won't show every option until you do.
 achievement:** code update as usual. Re-run `scraper/assign_provinces.py`
 once to backfill the `crosses_border` field into `data/routes.geojson` (no
 need to re-run `scrape_routes.py` for this one).
+
+**Updating to a version that added the "Dat is geen trein!" (route doesn't
+end at a station) achievement:** code update as usual. This version also
+fixes two scraper bugs (a route whose title uses an en dash instead of a
+regular hyphen wasn't split into start/end correctly, and station names
+were stored abbreviated — "Utrecht C." instead of "Utrecht Centraal" —
+which broke matching). Re-run the full data pipeline to get clean data:
+`scrape_routes.py`, `fetch_rail_network.py`, `assign_provinces.py`, then
+`check_station_endpoints.py` (new) to backfill `ends_at_station`.
